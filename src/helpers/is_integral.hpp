@@ -15,6 +15,17 @@
 
 namespace ft
 {
+    //Remove Const
+    template <class T> struct remove_const { typedef T type; };
+    template <class T> struct remove_const <const T> { typedef T type; };
+
+    //Conditional
+    template<bool B, class T, class F>
+    struct conditional {typedef F type;};
+    template<class T, class F>
+    struct conditional<true, T, F> {typedef T type; };
+
+    //Is integral
     template <typename T>
     struct is_integral { static const bool val = false; };
 
