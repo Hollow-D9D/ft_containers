@@ -6,7 +6,7 @@
 /*   By: tharutyu <tharutyu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/03 05:56:38 by tharutyu          #+#    #+#             */
-/*   Updated: 2022/08/03 05:56:38 by tharutyu         ###   ########.fr       */
+/*   Updated: 2022/08/10 07:01:59 by tharutyu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -239,6 +239,7 @@ namespace ft{
                 size_type capacity() const { return (_c); }
                 size_type size() const { return (_s); }
                 size_type max_size() const { return (_a.max_size()); }
+                allocator_type get_allocator() const { return (_a); }
 
                 // Memory dvijuxa
                 void reserve (size_type n)
@@ -293,6 +294,41 @@ namespace ft{
                     _s = 0;
                 }
 
+                iterator erase (iterator pos)
+                {
+                    size_type n = static_cast<size_type>(std::distance(begin(), pos));
+                    for (size_type i = n; i < _s - 1; ++i)
+                    {
+                        _a.destroy(_f + i);
+                        _a.construct(_f + i, *(_f + i + 1));
+                    }
+                    _s--;
+                    _a.destroy(_f + _s - 1);
+                    return iterator(_f + n);
+                }
+
+                iterator erase (iterator first, iterator last)
+                {
+                    difference_type left = std::distance(begin(), first);
+                    difference_type right = std::distance(last, end());
+                    bool is_last = (last == end());
+                    for (; first != last; first++)
+                        _allocator.destroy(&(*first));
+                    size_type i = left;
+                    while (last < end())
+                    {
+                        if (this->_f + left)
+                            _a.destroy(_f + i);
+                        _a.construct(_f + i, *last);
+                        i++;
+                        last++;
+                    }
+                    for ( size_type i = left + right; i < _s; i++)
+                        _a.destroy(_f + i);
+                    _s = left + right;
+                    return is_last ? end() : iterator(_f + left);          
+                }
+
                 //Access
                 reference front() { return (*_f); }
                 reference back() { return (*(_f + _s - 1)); }
@@ -316,6 +352,15 @@ namespace ft{
                 const_reference operator[] (size_type n) const { return this->at(n); }
 
                 //The real deal
+
+                void swap(vector& x)
+                {
+                    std::swap(_f, x._f);
+                    std::swap(_s, x._s);
+                    std::swap(_c, x._c);
+                    std::swap(_a, x._a);
+                }
+
                 template <class IT>
                         void assign(IT first, IT last, typename enable_if<!is_integral<IT>::value>::type* = 0)
                 {
@@ -401,7 +446,128 @@ namespace ft{
                     }
                     return (begin() + start);
                 }
+
+                void insert (iterator pos, size_type n, const value_type& val)
+                {
+                    if (n == 0)
+                        return ;
+                    else if (max_size() - _s < n)
+                        throw std::length_error("vector");
+                    difference_type start = pos - begin();
+                    if (_s + n > _c)
+                    {
+                        size_type cap = _c * 2 >= _s + n ? _c * 2 : _s + n;
+                        pointer arr = _a.allocate(cap);
+                        std::uninitialized_copy(begin(), pos, iterator(arr));
+                        for (size_type i = 0; i < n; i++)
+                            _a.construct(arr + start + i, val);
+                        std::uninitialized_copy(pos, end(), iterator(arr + start + n));
+                        for (size_type i = 0; i < _s; i++)
+                            _a.destroy(_f + i);
+                        _a.deallocate(_f, _c);
+                        _s += n;
+                        _c = cap;
+                        _f = arr;
+                    }
+                    else
+                    {
+                        for (size_type i = _s; i > static_cast<size_type>(start); i--)
+                        {
+                            _a.destroy(_f + i + n - 1);
+                            _a.construct(_f + i + n - 1, *(_f + i - 1));
+                        }
+                        for (size_type i = 0; i < n; i++)
+                        {
+                            _a.destory(_f + i + start);
+                            _a.construct(_f + i + start, val);
+                        }
+                        _s += n;
+                    }
+                }
+
+                template <class IT>
+                void insert(iterator pos, IT first, IT last, typename enable_if<!is_integral<IT>::value>::type* = 0)
+                {
+                    if (pos < begin() || pos > end() || first > last)
+                        throw std::logic_error("vector");
+                    size_type start = static_cast<size_type>(pos - begin());
+                    size_type n = static_cast<size_type>(last - first);
+                    if (_s + n > _c)
+                    {
+                        size_type cap = _c * 2 >= _s + n ? _c * 2 : _s + n;
+                        pointer arr = _a.allocate(cap);
+                        std::uninitialized_copy(begin(), pos, iterator(arr));
+                        try {
+                            for (size_type i = 0; i < static_cast<size_type>(n); i++, first++)
+                                _a.construct(arr + start + i, *first);
+                        } catch (...) {
+                            for (size_type i = 0; i < n + start; ++i)
+                                _a.destroy(arr + i);
+                            _a.deallocate(arr, cap);
+                            throw;
+                        }
+                        std::uninitialized_copy(pos, end(), iterator(arr + start + n));
+                        for (size_type i = 0; i < _s; i++)
+                            _a.destroy(_f + i);
+                        _a.deallocate(_f, _c);
+                        _s += count;
+                        _c = cap;
+                        _f = arr;
+                    }
+                    else
+                    {
+                        for (size_type i = _s; i > static_cast<size_type>(start); i--)
+                        {
+                            _a.destroy(_f + i + n - 1);
+                            _a.construct(_f + i + n - 1, *(_f + i - 1));
+                        }
+                        for (size_type i = 0; i < static_cast<size_type>(n); i++, first++)
+                        {
+                            _a.destroy(_f + i + n);
+                            _a.construct(_f + start + i, *first);
+                        }
+                        _s += n;
+                    }
+                }
     };
+
+    // Non-member operators
+    
+    template <class T, class Alloc>
+    bool operator== (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
+    {
+        if (lhs.size() != rhs.size())
+            return false;
+        for (size_t i = 0; i < rhs.size(); i++)
+            if (lhs[i] != rhs[i])
+                return false;
+        return true;
+    }
+
+    template<class T, class Alloc>
+    bool operator!= (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) 
+    { return !(lhs == rhs); }
+
+    template<class T, class Alloc>
+    bool operator< (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
+    { return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()); }
+
+    template<class T, class Alloc>
+    bool operator<= (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
+    { return !(rhs < lhs); }
+
+    template<class T, class Alloc>
+    bool operator> (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
+    { return rhs < lhs; }
+
+    template<class T, class Alloc>
+    bool operator>= (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
+    { return !(lhs < rhs); }
+}
+
+namespace std{
+        template<class T, class Alloc>
+        void swap (ft::vector<T, Alloc>& lhs, ft::vector<T,Alloc>*rhs) { lhs.swap(rhs); }
 }
 
 #endif
