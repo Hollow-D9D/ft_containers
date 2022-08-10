@@ -313,7 +313,7 @@ namespace ft{
                     difference_type right = std::distance(last, end());
                     bool is_last = (last == end());
                     for (; first != last; first++)
-                        _allocator.destroy(&(*first));
+                        _a.destroy(&(*first));
                     size_type i = left;
                     while (last < end())
                     {
@@ -478,7 +478,7 @@ namespace ft{
                         }
                         for (size_type i = 0; i < n; i++)
                         {
-                            _a.destory(_f + i + start);
+                            _a.destroy(_f + i + start);
                             _a.construct(_f + i + start, val);
                         }
                         _s += n;
@@ -510,7 +510,7 @@ namespace ft{
                         for (size_type i = 0; i < _s; i++)
                             _a.destroy(_f + i);
                         _a.deallocate(_f, _c);
-                        _s += count;
+                        _s += n;
                         _c = cap;
                         _f = arr;
                     }
@@ -567,7 +567,7 @@ namespace ft{
 
 namespace std{
         template<class T, class Alloc>
-        void swap (ft::vector<T, Alloc>& lhs, ft::vector<T,Alloc>*rhs) { lhs.swap(rhs); }
+        void swap (ft::vector<T, Alloc>& lhs, ft::vector<T,Alloc>& rhs) { lhs.swap(rhs); }
 }
 
 #endif
