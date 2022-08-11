@@ -6,7 +6,7 @@
 /*   By: tharutyu <tharutyu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/03 05:56:38 by tharutyu          #+#    #+#             */
-/*   Updated: 2022/08/10 07:01:59 by tharutyu         ###   ########.fr       */
+/*   Updated: 2022/08/11 06:59:58 by tharutyu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -531,7 +531,7 @@ namespace ft{
                 }
     };
 
-    // Non-member operators
+    // Non-member logicaloperators
     
     template <class T, class Alloc>
     bool operator== (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
