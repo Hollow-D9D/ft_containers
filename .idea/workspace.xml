@@ -10,10 +10,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5ce4e44b-1108-4223-bef4-2d25bb65efea" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/containers_tester" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ft_containers-unit-test" beforeDir="false" afterPath="$PROJECT_DIR$/ft_containers-unit-test" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ft_containers-unit-test/config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/ft_containers-unit-test/config.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/container/vector.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/container/vector.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/helpers/utilities.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/helpers/utilities.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -25,6 +23,7 @@
     <session id="743866387">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
+          <entry key="project.closed" value="1" />
           <entry key="project.open.time.2" value="1" />
           <entry key="project.opened" value="1" />
         </counts>
@@ -101,8 +100,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/container/vector.hpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="418">
-              <caret line="381" column="55" selection-start-line="381" selection-start-column="55" selection-end-line="381" selection-end-column="55" />
+            <state relative-caret-position="568">
+              <caret line="391" column="21" lean-forward="true" selection-start-line="391" selection-start-column="21" selection-end-line="391" selection-end-column="21" />
               <folding>
                 <element signature="e#5007#5031#0" expanded="true" />
                 <element signature="e#8411#8421#0" expanded="true" />
@@ -198,16 +197,15 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1660082688772</updated>
-      <workItem from="1660082690828" duration="8832000" />
+      <workItem from="1660082690828" duration="9033000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="8832000" />
+    <option name="totallyTimeSpent" value="9033000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="868" y="74" width="1857" height="1000" extended-state="0" />
-    <editor active="true" />
     <layout>
       <window_info id="Favorites" side_tool="true" />
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.01983471" />
@@ -270,8 +268,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/container/vector.hpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="418">
-          <caret line="381" column="55" selection-start-line="381" selection-start-column="55" selection-end-line="381" selection-end-column="55" />
+        <state relative-caret-position="568">
+          <caret line="391" column="21" lean-forward="true" selection-start-line="391" selection-start-column="21" selection-end-line="391" selection-end-column="21" />
           <folding>
             <element signature="e#5007#5031#0" expanded="true" />
             <element signature="e#8411#8421#0" expanded="true" />
