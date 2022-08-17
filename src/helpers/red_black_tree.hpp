@@ -233,6 +233,18 @@ class red_black_tree
                 }
                 _r->is_black = true;
             }
+
+            public:
+                //Iterators
+                iterator begin() { return (iterator(_s == 0 ? _h : iterator(tree_min(_r)))); }
+                iterator end() { return (iterator(_h)); }
+                const_iterator begin() const { return (const_iterator(_s == 0 ? _h : const_iterator(tree_min(_r)))); }
+                const_iterator end() const { return const_iterator(_h); }
+                reverse_iterator rbegin() { return (reverse_iterator(end())); }
+                reverse_iterator rend() { return reverse_iterator(begin()); }
+                const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
+                const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
+                
 };
 
 #endif
