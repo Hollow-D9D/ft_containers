@@ -79,7 +79,7 @@ class red_black_tree
                 _h->is_black = true;
             }
 
-            void put(node_pointer dst, node_pointer n)
+            void transplant(node_pointer dst, node_pointer n)
             {
                 if (dst == _r)
                     _r = n;
@@ -244,7 +244,64 @@ class red_black_tree
                 reverse_iterator rend() { return reverse_iterator(begin()); }
                 const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
                 const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
+
+                //Constructors
+                red_black_tree(const Compare &c, const allocator_type& a = allocator_type()) : _alloc_v(a), _alloc_n(node_allocator()), _c(c), _r(0), _s(0)
+                {
+                    init_nil_head();
+                    _r = _h;
+                }
+
+                red_black_tree() : _alloc_v(allocator_type()), _alloc_n(node_allocator()), _c(value_compare), _r(0), _s(0)
+                {
+                    init_nil_head();
+                    _r = _h;
+                }
+
+                template<class IT>
+                red_black_tree(typename ft::enable_if< !ft::is_integral<IT>::value, IT>::type first, IT last, const value_compare& c, const allocator_type& a = allocator_type()) : _alloc_v(a), _alloc_n(node_allocator()), _c(c)
+                {
+                    init_nil_head();
+                    _r = _h;
+                    for (; first != last, ++first)
+                        insert(*first);
+                }
+
+                red_black_tree(const red_black_tree& copy) : _c(copy._c), _r(NULL) { *this = copy; }
+
+                red_black_tree& operator=(const red_black_tree& rhs)
+                {
+                    if (this == &rhs)
+                        return *this;
+                    this->_alloc_n = rhs._alloc_n;
+                    this->_alloc_v = rhs._alloc_v;
+                    this->_c = rhs._c;
+                    if (this->_r == NULL)
+                        init_nil_head();
+                    else
+                        clear_node(_r);
+                    if (rhs._s == 0)
+                        this->_r = this->_h;
+                    else
+                    {
+                        this->_r = copy_node(rhs._r);
+                        copy_child(this->_r, rhs._r);
+                    }
+                    this->_s = rhs._s;
+                    return *this;
+                }
+
+                ~red_black_tree() 
+                {
+                    clear_node(_r);
+                    _alloc_v.destroy(_h->value);
+                    _alloc_v.deallocate(_h->value, 1);
+                    _alloc_n.deallocate(_n, 1);
+                    _alloc_n.deallocate(_h, 1);
+                }
+
                 
+
 };
 
 #endif
