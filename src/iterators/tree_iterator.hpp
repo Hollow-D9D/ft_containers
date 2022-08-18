@@ -86,7 +86,7 @@ class TreeIterator
             TreeIterator(const TreeIterator<typename ft::remove_const<value_type>::type > & copy) { *this = copy; }
             TreeIterator& operator=(const TreeIterator<typename ft::remove_const<value_type>::type>& rhs)
             {
-                this->_n = other.node();
+                this->_n = rhs.node();
                 return *this;
             }
             reference operator*() const { return *(_n->value); }
@@ -95,7 +95,7 @@ class TreeIterator
             {
                 if(_n->right && !_n->right->is_nil)
                 {
-                    _n = tree_min(_node->right);
+                    _n = tree_min(_n->right);
                 }
                 else
                 {
@@ -130,7 +130,7 @@ class TreeIterator
             TreeIterator& operator--()
             {
                 if (_n->left && !_n->left->is_nil)
-                    _node = tree_max(_n->left);
+                    _n = tree_max(_n->left);
                 else
                 {
                     node_pointer p = _n->parent;
@@ -148,7 +148,7 @@ class TreeIterator
             {
                 TreeIterator<value_type> temp = *this;
                 if (_n->left && !_n->left->is_nil)
-                    _node = tree_max(_n->left);
+                    _n = tree_max(_n->left);
                 else
                 {
                     node_pointer p = _n->parent;
@@ -159,7 +159,7 @@ class TreeIterator
                     }
                     _n = p;
                 }
-                return *temp;
+                return temp;
             }
 };
 

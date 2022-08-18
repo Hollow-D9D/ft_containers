@@ -18,7 +18,7 @@ namespace ft
                 typedef Allocator       allocator_type;
                 typedef std::size_t     size_type;
                 typedef std::ptrdiff_t  difference_type;
-                typedef pait<const Key, T>  value_type;
+                typedef pair<const Key, T>  value_type;
                 typedef const value_type& reference;
                 typedef typename allocator_type::pointer pointer;
                 typedef typename allocator_type::const_pointer const_pointer;
@@ -31,7 +31,7 @@ namespace ft
                     public:
                             pair_compare(const key_compare & compare) : _c(compare) {}
 
-                            bool operator()(const value_type& lhs, const value_type & rhs) const { return (_c(lhs.first, rhs.first)); }
+                            bool operator()(const value_type& lhs, const value_type& rhs) const { return (_c(lhs.first, rhs.first)); }
                 };
         
         public:
@@ -62,6 +62,11 @@ namespace ft
                 value_compare value_comp() const { return (_t.value_comp()); }
                 key_compare key_comp() const { return (_c); }
                 size_type count( const Key& key) const { return (_t.count(make_pair(key, mapped_type()))); }
+                void swap(map & other)
+                {
+			        std::swap(this->_c, other._c);
+			        _t.swap(other._t);
+		        }
 
                 //insert
                 pair<iterator, bool> insert (const value_type& value) { return (_t.insert(value)); }
@@ -77,7 +82,7 @@ namespace ft
                 reverse_iterator rend() { return (_t.rend()); }
                 
 
-                iterator find(const Key& key) const { return (_t.count(make_pair(key, mapped_type()))); }
+                iterator find(const Key& key) { return (_t.find(make_pair(key, mapped_type()))); }
                 
                 iterator lower_bound(const key_type& key) { return (_t.lower_bound(make_pair(key, mapped_type()))); }
                 iterator upper_bound(const key_type& key) { return (_t.upper_bound(make_pair(key, mapped_type()))); }

@@ -69,11 +69,11 @@ class red_black_tree
             void init_nil_head()
             {
                 _n = _alloc_n.allocate(1);
-                _alloc_n.construct(_n, Node<Value>());
+                _alloc_n.construct(_n, ft::Node<Value>());
                 _n->is_black = true;
                 _n->is_nil = true;
                 _h = _alloc_n.allocate(1);
-                _alloc_n.construct(_h, Node<Value>());
+                _alloc_n.construct(_h, ft::Node<Value>());
                 _h->value = _alloc_v.allocate(1);
                 _alloc_v.construct(_h->value, Value());
                 _h->is_black = true;
@@ -204,7 +204,7 @@ class red_black_tree
                                 }
                                 n->parent->is_black = true;
                                 n->parent->parent->is_black = false;
-                                _rotate_right(node->parent->parent);
+                                _rotate_right(n->parent->parent);
                             }
                         }
                         else
@@ -265,7 +265,7 @@ class red_black_tree
                 node_pointer copy_node(node_pointer other)
                 {
                     node_pointer rtn = _alloc_n.allocate(1);
-                    _alloc_n.construct(rtn, Node<Value>());
+                    _alloc_n.construct(rtn, ft::Node<Value>());
                     rtn->is_black = other->is_black;
                     rtn->is_nil = other->is_nil;
                     if (other->value)
@@ -284,7 +284,7 @@ class red_black_tree
                     {
                         my_node->left = copy_node(other->left);
                         my_node->left->parent = my_node;
-                        copy_child(my_node->left, other->left)
+                        copy_child(my_node->left, other->left);
                     }
                     if(other->right->is_nil)
                         my_node->right = _n;
@@ -332,7 +332,7 @@ class red_black_tree
                     if (find_val)
                         return ft::pair<iterator, bool>(iterator(find_val), false);
                     node_pointer new_node = _alloc_n.allocate(1);
-                    _alloc_n.construct(new_node, Node<value_type>(create_value(value)));
+                    _alloc_n.construct(new_node, ft::Node<value_type>(create_value(value)));
                     new_node->left = _n;
                     new_node->right = _n;
                     _insert_tree(new_node, _r);
@@ -351,7 +351,7 @@ class red_black_tree
                     if (new_node)
                         return (iterator(new_node));
                     new_node = _alloc_n.allocate(1);
-                    _alloc_n.construct(new_node, Node<value_type>(create_value(value)));
+                    _alloc_n.construct(new_node, ft::Node<value_type>(create_value(value)));
                     new_node->left = _n;
                     new_node->right = _n;
                     if (position == begin())
@@ -389,6 +389,14 @@ class red_black_tree
                 }
 
                 //Erase
+
+                void clear()
+                {
+                    clear_node(_r);
+                    _r = _h;
+                    _h->parent = NULL;
+                    _s = 0;
+                }
                 void erase_fixup(node_pointer x)
                 {
                     node_pointer brother;
@@ -458,28 +466,22 @@ class red_black_tree
 
                 void erase(iterator pos)
                 {
-                    node_pointer y = pos.node();
-                    node_pointer x;
-                    node_pointer for_free = y;
+                    node_pointer y = pos.node(), x, for_free = y;
                     bool y_original_is_black = y->is_black;
-                    if(is_nil(y->left))
-                    {
+                    if (is_nil(y->left)){
                         x = y->right;
                         transplant(y, y->right);
                     }
-                    else if (is_nil(y->right))
-                    {
+                    else if (is_nil(y->right)){
                         x = y->left;
                         transplant(y, y->left);
                     }
-                    else 
-                    {
+                    else {
                         node_pointer z = y;
                         y = tree_min(z->right);
                         y_original_is_black = y->is_black;
                         x = y->right;
-                        if (y->parent != z)
-                        {
+                        if (y->parent != z){
                             transplant(y, y->right);
                             y->right = z->right;
                             z->right->parent = y;
@@ -496,8 +498,7 @@ class red_black_tree
                     _n->parent = NULL;
                     if (_s == 0)
                         _r = _h;
-                    else
-                    {
+                    else{
                         if (_s != 1)
                             x = tree_max(_r);
                         else
@@ -528,7 +529,7 @@ class red_black_tree
                     _r = _h;
                 }
 
-                red_black_tree() : _alloc_v(allocator_type()), _alloc_n(node_allocator()), _c(value_compare), _r(0), _s(0)
+                red_black_tree() : _alloc_v(allocator_type()), _alloc_n(node_allocator()), _c(value_compare()), _r(0), _s(0)
                 {
                     init_nil_head();
                     _r = _h;
@@ -539,7 +540,7 @@ class red_black_tree
                 {
                     init_nil_head();
                     _r = _h;
-                    for (; first != last, ++first)
+                    for (; first != last; ++first)
                         insert(*first);
                 }
 
@@ -579,7 +580,7 @@ class red_black_tree
                 iterator upper_bound(const value_type& value)
                 {
                     iterator last = end();
-                    for (iterator first = begin(); first != last, ++first)
+                    for (iterator first = begin(); first != last; ++first)
                         if (_c(value, *first))
                             return (first);
                     return(last);
@@ -606,12 +607,13 @@ class red_black_tree
                 const_iterator lower_bound(const value_type& value) const 
                 {
                     const_iterator last = end();
-                    for (const_iterator first = begin(); first != last, ++first)
+                    for (const_iterator first = begin(); first != last; ++first)
                         if (!_c(*first, value))
                             return (first);
                     return last;
                 }
 
+                size_type count(const value_type& value) const { return (find(value) != end()); }
                 void swap (red_black_tree &rhs)
                 {
                     std::swap(this->_r, rhs._r);
