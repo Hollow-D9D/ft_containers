@@ -253,6 +253,274 @@ class red_black_tree
                 const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
                 const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
+
+                //Copy and creation
+                pointer create_value(const value_type & value)
+                {
+                    pointer rtn = _alloc_v.allocate(1);
+                    _alloc_v.construct(rtn, value);
+                    return rtn;
+                }
+
+                node_pointer copy_node(node_pointer other)
+                {
+                    node_pointer rtn = _alloc_n.allocate(1);
+                    _alloc_n.construct(rtn, Node<Value>());
+                    rtn->is_black = other->is_black;
+                    rtn->is_nil = other->is_nil;
+                    if (other->value)
+                    {
+                        rtn->value = _alloc_v.allocate(1);
+                        _alloc_v.construct(rtn->value, *other->value);
+                    }
+                    return (rtn);
+                }
+
+                void copy_child(node_pointer my_node, node_pointer other)
+                {
+                    if (other->left->is_nil)
+                        my_node->left = _n;
+                    else
+                    {
+                        my_node->left = copy_node(other->left);
+                        my_node->left->parent = my_node;
+                        copy_child(my_node->left, other->left)
+                    }
+                    if(other->right->is_nil)
+                        my_node->right = _n;
+                    else if (other->right->right == NULL)
+                    {
+                        my_node->right = _h;
+                        _h->parent = my_node;
+                    }
+                    else
+                    {
+                        my_node->right = copy_node(other->right);
+                        my_node->right->parent = my_node;
+                        copy_child(my_node->right, other->right);
+                    }
+                }
+
+                //Search/Find
+                node_pointer search(const value_type &value, node_pointer node) const
+                {
+                    if (!node || is_nil(node))
+                        return NULL;
+                    if (_c(value, *node->value))
+                        return search(value, node->left);
+                    if (_c(*node->value, value))
+                        return search(value, node->right);
+                    return node;
+                }
+
+                iterator find(const value_type& value)
+                {
+                    node_pointer find_res = search(value, _r);
+                    return (find_res == NULL ? end() : iterator(find_res));
+                }
+
+                const_iterator find(const value_type& value) const
+                {
+                    node_pointer find_res = search(value, _r);
+                    return (find_res == NULL ? end() : const_iterator(find_res));
+                }
+
+                //Insert
+                ft::pair<iterator, bool> insert(value_type const &value)
+                {
+                    node_pointer find_val = search(value, _r);
+                    if (find_val)
+                        return ft::pair<iterator, bool>(iterator(find_val), false);
+                    node_pointer new_node = _alloc_n.allocate(1);
+                    _alloc_n.construct(new_node, Node<value_type>(create_value(value)));
+                    new_node->left = _n;
+                    new_node->right = _n;
+                    _insert_tree(new_node, _r);
+                    ft::pair<iterator, bool> res(iterator(new_node), true);
+                    _insert_recover(new_node);
+                    _s++;
+                    new_node = tree_max(_r);
+                    new_node->right = _h;
+                    _h->parent = new_node;
+                    return res;
+                }
+
+                iterator insert(iterator position, const value_type& value)
+                {
+                    node_pointer new_node = search(value, _r);
+                    if (new_node)
+                        return (iterator(new_node));
+                    new_node = _alloc_n.allocate(1);
+                    _alloc_n.construct(new_node, Node<value_type>(create_value(value)));
+                    new_node->left = _n;
+                    new_node->right = _n;
+                    if (position == begin())
+                    {
+                        if (position != end() && _c(value, *position))
+                            _insert_tree(new_node, tree_min(_r));
+                        else
+                            _insert_tree(new_node, _r);
+                    }
+                    else if (position == end())
+                    {
+                        if (position != begin() && _c(*(--position), value))
+                            _insert_tree(new_node, _h->parent);
+                        else
+                            _insert_tree(new_node, _r);
+                    }
+                    else
+                        _insert_tree(new_node, _r);
+                    _insert_recover(new_node);
+                    _s++;
+                    node_pointer max_of_tree = tree_max(_r);
+                    max_of_tree->right = _h;
+                    _h->parent = max_of_tree;
+                    return (iterator(new_node));
+                }
+
+                template<class IT>
+                void insert(typename ft::enable_if<!ft::is_integral<IT>::value, IT>::type first, IT last)
+                {
+                    while( first != last)
+                    {
+                        insert(*first);
+                        ++first;
+                    }
+                }
+
+                //Erase
+                void erase_fixup(node_pointer x)
+                {
+                    node_pointer brother;
+                    while (x != _r && x->is_black){
+                        if (x == x->parent->left){
+                            brother = x->parent->right;
+                            //case 1
+                            if (!brother->is_black){
+                                brother->is_black = true;
+                                x->parent->is_black = false;
+                                _rotate_left(x->parent);
+                                brother = x->parent->right;
+                            }
+                            //case 2
+                            if (brother->left->is_black && brother->right->is_black){
+                                brother->is_black = false;
+                                x = x->parent;
+                            }
+                            else{
+                            //case 3
+                                if (brother->right->is_black){
+                                    brother->left->is_black = true;
+                                    brother->is_black = false;
+                                    _rotate_right(brother);
+                                    brother = x->parent->right;
+                                }
+                            //case 4
+                                brother->is_black = x->parent->is_black;
+                                x->parent->is_black = true;
+                                brother->right->is_black = true;
+                                _rotate_left(x->parent);
+                                x = _r;
+                            }
+                        }
+                        else{
+                            brother = x->parent->left;
+                            //case 1
+                            if (!brother->is_black){
+                                brother->is_black = true;
+                                x->parent->is_black = false;
+                                _rotate_right(x->parent);
+                                brother = x->parent->left;
+                            }
+                            //case 2
+                            if (brother->right->is_black && brother->left->is_black){
+                                brother->is_black = false;
+                                x = x->parent;
+                            }
+                            else{
+                            //case 3
+                                if (brother->left->is_black){
+                                    brother->right->is_black = true;
+                                    brother->is_black = false;
+                                    _rotate_left(brother);
+                                    brother = x->parent->left;
+                                }
+                            //case 4
+                                brother->is_black = x->parent->is_black;
+                                x->parent->is_black = true;
+                                brother->left->is_black = true;
+                                _rotate_right(x->parent);
+                                x = _r;
+                            }
+                        }
+                    }
+                }
+
+                void erase(iterator pos)
+                {
+                    node_pointer y = pos.node();
+                    node_pointer x;
+                    node_pointer for_free = y;
+                    bool y_original_is_black = y->is_black;
+                    if(is_nil(y->left))
+                    {
+                        x = y->right;
+                        transplant(y, y->right);
+                    }
+                    else if (is_nil(y->right))
+                    {
+                        x = y->left;
+                        transplant(y, y->left);
+                    }
+                    else 
+                    {
+                        node_pointer z = y;
+                        y = tree_min(z->right);
+                        y_original_is_black = y->is_black;
+                        x = y->right;
+                        if (y->parent != z)
+                        {
+                            transplant(y, y->right);
+                            y->right = z->right;
+                            z->right->parent = y;
+                        }
+                        transplant(z, y);
+                        y->left = z->left;
+                        y->left->parent = y;
+                        y->is_black = z->is_black;
+                    }
+                    free_node(for_free);
+                    if (y_original_is_black)
+                        erase_fixup(x);
+                    _s--;
+                    _n->parent = NULL;
+                    if (_s == 0)
+                        _r = _h;
+                    else
+                    {
+                        if (_s != 1)
+                            x = tree_max(_r);
+                        else
+                            x = _r;
+                        x->right = _h;
+                        _h->parent = x;
+                    }
+                }
+
+                size_type erase(const value_type& value)
+                {
+                    node_pointer res = search(value, _r);
+                    if (res)
+                        erase(iterator(res));
+                    return (res != NULL);
+                }
+
+                void erase(iterator first, iterator last)
+                {
+                    while (first != last)
+                        erase(first++);
+                }
+
                 //Constructors
                 red_black_tree(const Compare &c, const allocator_type& a = allocator_type()) : _alloc_v(a), _alloc_n(node_allocator()), _c(c), _r(0), _s(0)
                 {
