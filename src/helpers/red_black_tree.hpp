@@ -235,6 +235,14 @@ class red_black_tree
             }
 
             public:
+
+                //getters
+                size_type size() const { return (_s); }
+                size_type max_size() const { return (_alloc_v.max_size()); }
+                bool empty() const { return (_s == 0); }
+                value_compare value_comp() const { return (_c); }
+                allocator_type get_allocator() const { return (_alloc_v); }
+
                 //Iterators
                 iterator begin() { return (iterator(_s == 0 ? _h : iterator(tree_min(_r)))); }
                 iterator end() { return (iterator(_h)); }
@@ -300,8 +308,72 @@ class red_black_tree
                     _alloc_n.deallocate(_h, 1);
                 }
 
+                iterator upper_bound(const value_type& value)
+                {
+                    iterator last = end();
+                    for (iterator first = begin(); first != last, ++first)
+                        if (_c(value, *first))
+                            return (first);
+                    return(last);
+                }
+
+                iterator lower_bound(const value_type& value)
+                {
+                    iterator last = end();
+                    for (iterator first = begin(); first != last; ++first)
+                        if (!_c(*first, value))
+                            return (first);
+                    return (last);
+                }
+
+                const_iterator upper_bound(const value_type& value) const
+                {
+                    const_iterator last = end();
+                    for (const_iterator first = begin(); first != last; ++first)
+                        if (!_c(value, *first))
+                            return (first);
+                    return last;
+                }
+
+                const_iterator lower_bound(const value_type& value) const 
+                {
+                    const_iterator last = end();
+                    for (const_iterator first = begin(); first != last, ++first)
+                        if (!_c(*first, value))
+                            return (first);
+                    return last;
+                }
+
+                void swap (red_black_tree &rhs)
+                {
+                    std::swap(this->_r, rhs._r);
+                    std::swap(this->_n, rhs._n);
+                    std::swap(this->_h, rhs._h);
+                    std::swap(this->_s, rhs._s);
+                    std::swap(this->_alloc_n, rhs._alloc_n);
+                    std::swap(this->_alloc_v, rhs._alloc_v);
+                    std::swap(this->_c, rhs._c);
+                }    
                 
+                ft::pair<iterator, iterator> equal_range(const value_type& value) { return (ft::make_pair(lower_bound(value), upper_bound(value))); }
+
 
 };
 
+//logic operators
+template <class T, class Compare, class Alloc>
+bool operator<(const red_black_tree<T, Compare, Alloc>& lhs, const red_black_tree<T, Compare, Alloc>& rhs)
+{ return (ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end())); }
+
+template <class T, class Compare, class Alloc>
+bool operator>(const red_black_tree<T, Compare, Alloc>& lhs, const red_black_tree<T, Compare, Alloc>& rhs)
+{ return (lhs < rhs); }
+
+template <class T, class Compare, class Alloc>
+bool operator==(const red_black_tree<T, Compare, Alloc>& lhs, const red_black_tree<T, Compare, Alloc>& rhs)
+{ return (lhs.size() == rhs.size() && ft::equal(lhs.begin(), lhs.end(), rhs.begin())); }
+
+template <class T, class Compare, class Alloc>
+void swap(const red_black_tree<T, Compare, Alloc>& lhs, const red_black_tree<T, Compare, Alloc>& rhs)
+{ lhs.swap(rhs); }
 #endif
